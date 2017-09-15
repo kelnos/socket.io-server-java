@@ -6,7 +6,7 @@
 
     <groupId>com.codeminders.socketio</groupId>
     <artifactId>socketio-parent</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Socket.IO Java Server</name>
@@ -279,7 +279,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>21.0</version>
+            <version>23.0</version>
         </dependency>
     </dependencies>
 
