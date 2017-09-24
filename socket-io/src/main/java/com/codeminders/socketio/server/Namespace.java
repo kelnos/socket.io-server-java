@@ -131,4 +131,9 @@ public class Namespace implements Outbound, ConnectionListener, DisconnectListen
                 room.leave(socket);
         }
     }
+
+    public Iterable<Socket> getSockets()
+    {
+        return sockets;
+    }
 }

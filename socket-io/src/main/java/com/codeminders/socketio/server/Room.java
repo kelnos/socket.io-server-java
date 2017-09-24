@@ -86,4 +86,9 @@ public class Room implements Outbound
                 socket.emit(name, args);
         }
     }
+
+    public Iterable<Socket> getSockets()
+    {
+        return sockets;
+    }
 }
