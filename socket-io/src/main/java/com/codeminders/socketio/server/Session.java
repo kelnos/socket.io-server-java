@@ -30,6 +30,7 @@ import com.codeminders.socketio.protocol.*;
 import com.codeminders.socketio.common.ConnectionState;
 import com.codeminders.socketio.common.DisconnectReason;
 
+import javax.servlet.http.HttpSession;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.*;
@@ -51,6 +52,7 @@ public class Session implements DisconnectListener
 
     private final SocketIOManager socketIOManager;
     private final String          sessionId;
+    private final HttpSession     httpSession;
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
     private Map<String, Socket> sockets = new LinkedHashMap<>(); // namespace, socket
@@ -69,12 +71,13 @@ public class Session implements DisconnectListener
     private int                       packet_id     = 0; // packet id. used for requesting ACK
     private Map<Integer, ACKListener> ack_listeners = new LinkedHashMap<>(); // packetid, listener
 
-    Session(SocketIOManager socketIOManager, String sessionId)
+    Session(SocketIOManager socketIOManager, String sessionId, HttpSession httpSession)
     {
         assert (socketIOManager != null);
 
         this.socketIOManager = socketIOManager;
         this.sessionId = sessionId;
+        this.httpSession = httpSession;
     }
 
     public Socket createSocket(String ns)
@@ -495,5 +498,10 @@ public class Session implements DisconnectListener
             if (LOGGER.isLoggable(Level.WARNING))
                 LOGGER.log(Level.WARNING, "Cannot send NOOP packet while upgrading the transport", e);
         }
+    }
+
+    public HttpSession getHttpSession()
+    {
+        return httpSession;
     }
 }

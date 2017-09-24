@@ -29,6 +29,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 /**
  * @author Alexander Sova (bird@codeminders.com)
@@ -72,7 +73,7 @@ public abstract class AbstractTransport implements Transport
             session = sessionManager.getSession(sessionId);
 
         if(session == null)
-            return createConnection(sessionManager.createSession());
+            return createConnection(sessionManager.createSession(request.getSession()));
 
         TransportConnection activeConnection = session.getConnection();
 
