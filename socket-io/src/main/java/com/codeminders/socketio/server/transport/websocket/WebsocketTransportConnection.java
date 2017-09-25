@@ -35,6 +35,7 @@ import com.google.common.io.ByteStreams;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.websocket.*;
 import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpoint;
@@ -295,6 +296,21 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
         return values.get(0);
     }
 
+    private HttpSession getHttpSession(javax.websocket.Session session)
+    {
+        HandshakeRequest handshake = (HandshakeRequest)
+                session.getUserProperties().get(HandshakeRequest.class.getName());
+        if (handshake == null)
+        {
+            return null;
+        }
+        if (!(handshake.getHttpSession() instanceof HttpSession))
+        {
+            return null;
+        }
+        return (HttpSession) handshake.getHttpSession();
+    }
+
     /**
      * Initializes socket.io session
      * @param session
@@ -308,7 +324,8 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
             sess = SocketIOManager.getInstance().getSession(sessionId);
         }
         if (sess == null) {
-            sess = SocketIOManager.getInstance().createSession();
+            HttpSession httpSession = getHttpSession(session);
+            sess = SocketIOManager.getInstance().createSession(httpSession);
         }
         setSession(sess);
     }

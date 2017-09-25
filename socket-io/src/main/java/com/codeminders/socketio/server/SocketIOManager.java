@@ -25,6 +25,7 @@
  */
 package com.codeminders.socketio.server;
 
+import javax.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -78,11 +79,24 @@ public final class SocketIOManager
     /**
      * Creates new session
      *
+     * @deprecated use {@link SocketIOManager#createSession(HttpSession)}
      * @return new session
      */
+    @Deprecated
     public Session createSession()
     {
-        Session session = new Session(this, generateSessionId());
+        return createSession(null);
+    }
+
+    /**
+     * Creates new session
+     *
+     * @param httpSession The HTTP session of the connecting client
+     * @return new session
+     */
+    public Session createSession(HttpSession httpSession)
+    {
+        Session session = new Session(this, generateSessionId(), httpSession);
         sessions.put(session.getSessionId(), session);
         return session;
     }
