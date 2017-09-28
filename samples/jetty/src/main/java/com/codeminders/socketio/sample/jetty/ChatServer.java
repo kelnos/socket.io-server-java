@@ -69,9 +69,36 @@ public class ChatServer {
         context.addServlet(ChatSocketServlet.class, "/socket.io/*");
         context.addServlet(DefaultServlet.class, "/*");
 
+        /*
+         For root context endpoint initialization uses WebsocketTransportConnection annotations.
+         Default endpoint configuration assumes it's accessible via /socket.io/ path
+        */
         WebSocketServerContainerInitializer.
                 configureContext(context).
                 addEndpoint(WebsocketTransportConnection.class);
+
+        /*
+         For non-root contexts endpoint initialization should override endpoint path
+         to refer to context-specific path. For example if context's path if /foo then
+         we should declare path as "/bar" if endpoint is accessible via /foo/bar path.
+         Default endpoint configuration assumes it's located in the root context and accessible via
+         /socket.io/ path.
+         See sample initialization code below
+        */
+        /*
+        ServerContainer serverContainer = WebSocketServerContainerInitializer.
+                configureContext(context);
+        serverContainer.
+                addEndpoint(new AnnotatedServerEndpointConfig(serverContainer,
+                        WebsocketTransportConnection.class,
+                        WebsocketTransportConnection.class.getAnnotation(ServerEndpoint.class),
+                        null) {
+                    @Override
+                    public String getPath() {
+                        return "/";
+                    }
+                });
+         */
 
         server.start();
         server.join();
