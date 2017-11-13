@@ -364,7 +364,7 @@ public final class SocketIOProtocol
             Set<Map.Entry> entries = ((Map) json).entrySet();
 
             for (Map.Entry e : entries)
-                map.put(e.getKey(), extractBinaryObjects(e, attachments));
+                map.put(e.getKey(), extractBinaryObjects(e.getValue(), attachments));
 
             return map;
         }
