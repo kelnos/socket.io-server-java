@@ -68,13 +68,19 @@ public class Socket implements Outbound, DisconnectListener, EventListener
      */
     public void disconnect(boolean closeConnection)
     {
-        getSession().getConnection().disconnect(getNamespace(), closeConnection);
+        TransportConnection connection = getSession().getConnection();
+        if (connection != null) {
+            connection.disconnect(getNamespace(), closeConnection);
+        }
     }
 
     @Override
     public void emit(String name, Object... args) throws SocketIOException
     {
-        getSession().getConnection().emit(getNamespace(), name, args);
+        TransportConnection connection = getSession().getConnection();
+        if (connection != null) {
+            connection.emit(getNamespace(), name, args);
+        }
     }
 
     /**
@@ -139,6 +145,7 @@ public class Socket implements Outbound, DisconnectListener, EventListener
      */
     public HttpServletRequest getRequest()
     {
-        return getSession().getConnection().getRequest();
+        TransportConnection connection = getSession().getConnection();
+        return connection == null ? null : connection.getRequest();
     }
 }
