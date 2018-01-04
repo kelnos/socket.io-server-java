@@ -491,7 +491,10 @@ public class Session implements DisconnectListener
     {
         try
         {
-            getConnection().send(EngineIOProtocol.createNoopPacket());
+            TransportConnection connection = getConnection();
+            if (connection != null) {
+                connection.send(EngineIOProtocol.createNoopPacket());
+            }
         }
         catch (SocketIOException e)
         {
