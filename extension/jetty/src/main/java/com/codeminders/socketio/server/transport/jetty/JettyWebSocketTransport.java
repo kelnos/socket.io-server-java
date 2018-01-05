@@ -95,6 +95,13 @@ public final class JettyWebSocketTransport extends AbstractTransport
             return;
         }
 
+        if(request.getHeader("Sec-WebSocket-Key") == null)
+        {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "Missing request header 'Sec-WebSocket-Key'");
+            return;
+        }
+
         final TransportConnection connection = getConnection(request, sessionManager);
 
         // a bit hacky but safe since we know the type of TransportConnection here
