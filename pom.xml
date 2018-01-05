@@ -6,7 +6,7 @@
 
     <groupId>com.codeminders.socketio</groupId>
     <artifactId>socketio-server</artifactId>
-    <version>1.0.2-b</version>
+    <version>1.0.2-c</version>
     <packaging>pom</packaging>
 
     <name>Socket.IO Java Server</name>
