@@ -37,12 +37,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.websocket.*;
+import javax.websocket.Session;
 import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpoint;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
@@ -57,7 +57,9 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
 {
     private static final Logger LOGGER = Logger.getLogger(WebsocketTransportConnection.class.getName());
 
-    private javax.websocket.Session remote_endpoint;
+    private static Class<? extends WebsocketIO> websocketIOClass = WebsocketIO.class;
+
+    private WebsocketIO websocketIO;
 
     public WebsocketTransportConnection() {
         super(WebsocketTransportProvider.websocket);
@@ -66,6 +68,14 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
     public WebsocketTransportConnection(Transport transport)
     {
         super(transport);
+    }
+
+    /**
+     *
+     * @param clazz class responsible for I/O operations
+     */
+    public static void setWebsocketIOClass(Class<? extends WebsocketIO> clazz) {
+        WebsocketTransportConnection.websocketIOClass = clazz;
     }
 
     @Override
@@ -81,7 +91,7 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
     @OnOpen
     public void onOpen(javax.websocket.Session session, EndpointConfig config) throws Exception
     {
-        remote_endpoint = session;
+        setupIO(session);
         setupSession(session);
         init(new ServletBasedConfig(
                 ServletConfigHolder.getInstance().getConfig(),
@@ -108,6 +118,10 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
                 abort();
             }
         }
+    }
+
+    private void setupIO(Session session) throws Exception {
+        websocketIO = websocketIOClass.getConstructor(Session.class).newInstance(session);
     }
 
     @OnClose
@@ -179,10 +193,10 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
     public void abort()
     {
         getSession().clearTimeout();
-        if (remote_endpoint != null)
+        if (websocketIO != null)
         {
             disconnectEndpoint();
-            remote_endpoint = null;
+            websocketIO = null;
         }
     }
 
@@ -224,7 +238,7 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
 
         try
         {
-            remote_endpoint.getBasicRemote().sendText(data);
+            websocketIO.sendString(data);
         }
         catch (IOException e)
         {
@@ -242,7 +256,7 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
 
         try
         {
-            remote_endpoint.getBasicRemote().sendBinary(ByteBuffer.wrap(data));
+            websocketIO.sendBinary(data);
         }
         catch (IOException e)
         {
@@ -255,7 +269,7 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
     {
         try
         {
-            remote_endpoint.close();
+            websocketIO.disconnect();
         }
         catch (IOException ex)
         {
