@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.codeminders.socketio.server.transport;
+package com.codeminders.socketio.server.servlet.transport;
 
 import com.codeminders.socketio.common.ConnectionState;
 import com.codeminders.socketio.protocol.EngineIOProtocol;
@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class AbstractHttpTransport extends AbstractTransport
+public abstract class AbstractHttpTransport extends AbstractServletTransport
 {
     private static final Logger LOGGER = Logger.getLogger(AbstractHttpTransport.class.getName());
 

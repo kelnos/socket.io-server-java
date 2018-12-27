@@ -20,31 +20,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.codeminders.socketio.server.transport.websocket;
-
-import com.codeminders.socketio.common.SocketIOException;
-import com.codeminders.socketio.server.SocketIOServlet;
-import com.codeminders.socketio.server.TransportProvider;
+package com.codeminders.socketio.server.servlet.transport.websocket;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 
 /**
- * @author Alexander Sova (bird@codeminders.com)
+ * @author Alex Saveliev (lyolik@codeminders.com)
  */
-public abstract class WebsocketIOServlet extends SocketIOServlet
+public final class ServletConfigHolder
 {
-    @Override
-    public void init(ServletConfig config) throws ServletException
-    {
-        super.init(config);
-        ServletConfigHolder.getInstance().setConfig(config);
-        try {
-            TransportProvider transportProvider = new WebsocketTransportProvider(config, getServletContext());
-            transportProvider.init();
-            setTransportProvider(transportProvider);
-        } catch (SocketIOException e) {
-            throw new ServletException("Failed to initialize Websocket transport provider: " + e.getMessage(), e);
-        }
+    private ServletConfig config;
+
+    private static ServletConfigHolder instance = new ServletConfigHolder();
+
+    private ServletConfigHolder() {
+    }
+
+    public static ServletConfigHolder getInstance() {
+        return instance;
+    }
+
+    public void setConfig(ServletConfig config) {
+        this.config = config;
+    }
+
+    public ServletConfig getConfig() {
+        return this.config;
     }
 }

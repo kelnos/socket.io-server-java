@@ -19,8 +19,16 @@
     <dependencies>
         <dependency>
             <groupId>com.codeminders.socketio</groupId>
-            <artifactId>socket-io</artifactId>
+            <artifactId>socket-io-servlet</artifactId>
             <version>2.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.websocket</groupId>
+            <artifactId>javax.websocket-api</artifactId>
         </dependency>
     </dependencies>
 

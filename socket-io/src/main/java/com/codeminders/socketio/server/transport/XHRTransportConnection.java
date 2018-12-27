@@ -11,7 +11,6 @@ import com.codeminders.socketio.server.SocketIOProtocolException;
 import com.codeminders.socketio.server.Transport;
 import com.google.common.io.CharStreams;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,6 +28,8 @@ public class XHRTransportConnection extends AbstractTransportConnection
 {
     private static final String ALLOWED_ORIGINS   = "allowedOrigins";
     private static final String ALLOW_ALL_ORIGINS = "allowAllOrigins";
+
+    private static final int SC_METHOD_NOT_ALLOWED = 405;
 
     private static final Logger LOGGER = Logger.getLogger(XHRTransportConnection.class.getName());
 
@@ -116,7 +117,7 @@ public class XHRTransportConnection extends AbstractTransportConnection
         else if(!"OPTIONS".equals(request.getMethod()))
         {
             // OPTIONS is CORS pre-flight request
-            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            response.sendError(SC_METHOD_NOT_ALLOWED);
         }
     }
 

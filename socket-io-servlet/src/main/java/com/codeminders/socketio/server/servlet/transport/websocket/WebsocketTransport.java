@@ -23,14 +23,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.codeminders.socketio.server.transport.websocket;
+package com.codeminders.socketio.server.servlet.transport.websocket;
 
 import com.codeminders.socketio.server.HttpRequest;
 import com.codeminders.socketio.server.HttpResponse;
 import com.codeminders.socketio.server.SocketIOManager;
 import com.codeminders.socketio.server.TransportConnection;
 import com.codeminders.socketio.server.TransportType;
-import com.codeminders.socketio.server.transport.AbstractTransport;
+import com.codeminders.socketio.server.servlet.transport.AbstractServletTransport;
 import com.codeminders.socketio.server.transport.AbstractTransportConnection;
 
 import javax.servlet.ServletConfig;
@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-public final class WebsocketTransport extends AbstractTransport
+public final class WebsocketTransport extends AbstractServletTransport
 {
     private static final Logger LOGGER = Logger.getLogger(WebsocketTransport.class.getName());
 

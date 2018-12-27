@@ -20,10 +20,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.codeminders.socketio.server.transport.websocket;
+package com.codeminders.socketio.server.servlet.transport.websocket;
 
 import com.codeminders.socketio.server.Transport;
-import com.codeminders.socketio.server.transport.AbstractTransportProvider;
+import com.codeminders.socketio.server.servlet.transport.AbstractServletTransportProvider;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -31,7 +31,7 @@ import javax.servlet.ServletContext;
 /**
  * @author Alexander Sova (bird@codeminders.com)
  */
-public class WebsocketTransportProvider extends AbstractTransportProvider
+public class WebsocketTransportProvider extends AbstractServletTransportProvider
 {
     private final Transport websocket;
 

@@ -9,29 +9,12 @@ import com.codeminders.socketio.server.TransportProvider;
 import com.codeminders.socketio.server.TransportType;
 import com.codeminders.socketio.server.UnsupportedTransportException;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
-/**
- * @author Alexander Sova (bird@codeminders.com)
- */
 public abstract class AbstractTransportProvider implements TransportProvider {
-
-    private static final Logger LOGGER = Logger.getLogger(AbstractTransportProvider.class.getName());
-
-    protected Map<TransportType, Transport> transports = new EnumMap<>(TransportType.class);
-
-    protected final ServletConfig servletConfig;
-    protected final ServletContext servletContext;
-
-    protected AbstractTransportProvider(ServletConfig servletConfig, ServletContext servletContext) {
-        this.servletConfig = servletConfig;
-        this.servletContext = servletContext;
-    }
+    private Map<TransportType, Transport> transports = new EnumMap<>(TransportType.class);
 
     /**
      *   Creates and initializes all available transports
@@ -94,20 +77,9 @@ public abstract class AbstractTransportProvider implements TransportProvider {
         return transports.values();
     }
 
-    protected Transport createXHRPollingTransport()
-    {
-        return new XHRPollingTransport(servletConfig, servletContext);
-    }
-
-    protected Transport createJSONPPollingTransport()
-    {
-        return null;
-    }
-
-    protected Transport createWebSocketTransport()
-    {
-        return null;
-    }
+    protected abstract Transport createXHRPollingTransport();
+    protected abstract Transport createJSONPPollingTransport();
+    protected abstract Transport createWebSocketTransport();
 
     private void addIfNotNull(TransportType type, Transport transport)
     {

@@ -20,27 +20,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.codeminders.socketio.server.transport.websocket;
+package com.codeminders.socketio.server.servlet.transport.websocket;
 
-import com.codeminders.socketio.common.ConnectionState;
-import com.codeminders.socketio.common.DisconnectReason;
 import com.codeminders.socketio.common.SocketIOException;
-import com.codeminders.socketio.protocol.BinaryPacket;
-import com.codeminders.socketio.protocol.EngineIOPacket;
 import com.codeminders.socketio.protocol.EngineIOProtocol;
-import com.codeminders.socketio.protocol.SocketIOPacket;
 import com.codeminders.socketio.server.Config;
-import com.codeminders.socketio.server.HttpRequest;
-import com.codeminders.socketio.server.HttpResponse;
-import com.codeminders.socketio.server.ServletBasedConfig;
 import com.codeminders.socketio.server.SocketIOManager;
-import com.codeminders.socketio.server.SocketIOProtocolException;
 import com.codeminders.socketio.server.Transport;
-import com.codeminders.socketio.server.transport.AbstractTransportConnection;
-import com.google.common.io.ByteStreams;
+import com.codeminders.socketio.server.servlet.ServletBasedConfig;
+import com.codeminders.socketio.server.transport.websocket.AbstractWebsocketTransportConnection;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
@@ -50,10 +39,8 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpoint;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,7 +50,7 @@ import java.util.logging.Logger;
  * @author Alex Saveliev (lyolik@codeminders.com)
  */
 @ServerEndpoint(value="/socket.io/", configurator = WebsocketConfigurator.class)
-public final class WebsocketTransportConnection extends AbstractTransportConnection
+public final class WebsocketTransportConnection extends AbstractWebsocketTransportConnection
 {
     private static final Logger LOGGER = Logger.getLogger(WebsocketTransportConnection.class.getName());
 
@@ -84,16 +71,6 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
         WebsocketTransportConnection.websocketIOClass = clazz;
     }
 
-    @Override
-    protected void init()
-    {
-        getSession().setTimeout(getConfig().getTimeout(Config.DEFAULT_PING_TIMEOUT));
-
-        if (LOGGER.isLoggable(Level.FINE))
-            LOGGER.fine(getConfig().getNamespace() + " WebSocket configuration:" +
-                    " timeout=" + getSession().getTimeout());
-    }
-
     @OnOpen
     public void onOpen(javax.websocket.Session session, EndpointConfig config) throws Exception
     {
@@ -105,25 +82,7 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
         session.setMaxBinaryMessageBufferSize(getConfig().getBufferSize());
         session.setMaxIdleTimeout(getConfig().getMaxIdle());
         session.setMaxTextMessageBufferSize(getConfig().getInt(Config.MAX_TEXT_MESSAGE_SIZE, 32000));
-
-        if(getSession().getConnectionState() == ConnectionState.CONNECTING)
-        {
-            try
-            {
-                send(EngineIOProtocol.createHandshakePacket(getSession().getSessionId(),
-                        new String[]{},
-                        getConfig().getPingInterval(Config.DEFAULT_PING_INTERVAL),
-                        getConfig().getTimeout(Config.DEFAULT_PING_TIMEOUT)));
-
-                getSession().onConnect(this);
-            }
-            catch (SocketIOException e)
-            {
-                LOGGER.log(Level.SEVERE, "Cannot connect", e);
-                getSession().setDisconnectReason(DisconnectReason.CONNECT_FAILED);
-                abort();
-            }
-        }
+        sendHandshake();
     }
 
     private void setupIO(Session session) throws Exception {
@@ -133,72 +92,23 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
     @OnClose
     public void onClose(javax.websocket.Session session, CloseReason closeReason)
     {
-        if(LOGGER.isLoggable(Level.FINE))
-            LOGGER.log(Level.FINE, "Session[" + getSession().getSessionId() + "]:" +
-                    " websocket closed. " + closeReason.toString());
-
-        //If close is unexpected then try to guess the reason based on closeCode, otherwise the reason is already set
-        if(getSession().getConnectionState() != ConnectionState.CLOSING)
-            getSession().setDisconnectReason(fromCloseCode(closeReason.getCloseCode().getCode()));
-
-        getSession().setDisconnectMessage(closeReason.getReasonPhrase());
-        getSession().onShutdown();
+        handleConnectionClosed(closeReason.getCloseCode().getCode(), closeReason.getReasonPhrase());
     }
 
     @OnMessage
     public void onMessage(String text)
     {
-        if (LOGGER.isLoggable(Level.FINE))
-            LOGGER.fine("Session[" + getSession().getSessionId() + "]: text received: " + text);
-
-        getSession().resetTimeout();
-
-        try
-        {
-            getSession().onPacket(EngineIOProtocol.decode(text), this);
-        }
-        catch (SocketIOProtocolException e)
-        {
-            if(LOGGER.isLoggable(Level.WARNING))
-                LOGGER.log(Level.WARNING, "Invalid packet received", e);
-        }
+        handleTextFrame(text);
     }
 
     @OnMessage
     public void onMessage(InputStream is)
     {
-        if (LOGGER.isLoggable(Level.FINE))
-            LOGGER.fine("Session[" + getSession().getSessionId() + "]: binary received");
-
-        getSession().resetTimeout();
-
-        try
-        {
-            getSession().onPacket(EngineIOProtocol.decode(is), this);
-        }
-        catch (SocketIOProtocolException e)
-        {
-            if(LOGGER.isLoggable(Level.WARNING))
-                LOGGER.log(Level.WARNING, "Problem processing binary received", e);
-        }
+        handleBinaryFrame(is);
     }
 
     @OnError
     public void onError(javax.websocket.Session session, Throwable error) {
-        // TODO implement
-        // One reason might be when you are refreshing web page causing connection to be dropped
-    }
-
-    @Override
-    public void handle(HttpRequest request, HttpResponse response) throws IOException
-    {
-        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unexpected request on upgraded WebSocket connection");
-    }
-
-    @Override
-    public void abort()
-    {
-        getSession().clearTimeout();
         if (websocketIO != null)
         {
             disconnectEndpoint();
@@ -207,33 +117,13 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
     }
 
     @Override
-    public void send(EngineIOPacket packet) throws SocketIOException
+    public void abort()
     {
-        sendString(EngineIOProtocol.encode(packet));
-    }
-
-    @Override
-    public void send(SocketIOPacket packet) throws SocketIOException
-    {
-        send(EngineIOProtocol.createMessagePacket(packet.encode()));
-        if(packet instanceof BinaryPacket)
+        super.abort();
+        if (websocketIO != null)
         {
-            Collection<InputStream> attachments = ((BinaryPacket) packet).getAttachments();
-            for (InputStream is : attachments)
-            {
-                ByteArrayOutputStream os = new ByteArrayOutputStream();
-                try
-                {
-                    os.write(EngineIOPacket.Type.MESSAGE.value());
-                    ByteStreams.copy(is, os);
-                }
-                catch (IOException e)
-                {
-                    if(LOGGER.isLoggable(Level.WARNING))
-                        LOGGER.log(Level.SEVERE, "Cannot load binary object to send it to the socket", e);
-                }
-                sendBinary(os.toByteArray());
-            }
+            disconnectEndpoint();
+            websocketIO = null;
         }
     }
 
@@ -284,21 +174,6 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
     }
 
     /**
-     * @link https://tools.ietf.org/html/rfc6455#section-11.7
-     */
-    private DisconnectReason fromCloseCode(int code)
-    {
-        switch (code) {
-            case 1000:
-                return DisconnectReason.CLOSED; // Normal Closure
-            case 1001:
-                return DisconnectReason.CLIENT_GONE; // Going Away
-            default:
-                return DisconnectReason.ERROR;
-        }
-    }
-
-    /**
      * @param session websocket session
      * @return session id extracted from handshake request's parameter
      */
@@ -316,27 +191,11 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
         return values.get(0);
     }
 
-    private HttpSession getHttpSession(javax.websocket.Session session)
-    {
-        HandshakeRequest handshake = (HandshakeRequest)
-                session.getUserProperties().get(HandshakeRequest.class.getName());
-        if (handshake == null)
-        {
-            return null;
-        }
-        if (!(handshake.getHttpSession() instanceof HttpSession))
-        {
-            return null;
-        }
-        return (HttpSession) handshake.getHttpSession();
-    }
-
     /**
      * Initializes socket.io session
-     * @param session
-     * @throws Exception
+     * @param session websocket session
      */
-    private void setupSession(javax.websocket.Session session) throws Exception
+    private void setupSession(javax.websocket.Session session)
     {
         String sessionId = getSessionId(session);
         com.codeminders.socketio.server.Session sess = null;

@@ -23,12 +23,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.codeminders.socketio.server;
+package com.codeminders.socketio.server.servlet;
 
 import com.codeminders.socketio.protocol.EngineIOProtocol;
 import com.codeminders.socketio.protocol.SocketIOProtocol;
-import com.codeminders.socketio.server.transport.HttpServletRequestWrapper;
-import com.codeminders.socketio.server.transport.HttpServletResponseWrapper;
+import com.codeminders.socketio.server.Namespace;
+import com.codeminders.socketio.server.SocketIOManager;
+import com.codeminders.socketio.server.SocketIOProtocolException;
+import com.codeminders.socketio.server.TransportProvider;
+import com.codeminders.socketio.server.UnsupportedTransportException;
+import com.codeminders.socketio.server.servlet.transport.HttpServletRequestWrapper;
+import com.codeminders.socketio.server.servlet.transport.HttpServletResponseWrapper;
 import com.google.common.io.ByteStreams;
 
 import javax.servlet.ServletException;

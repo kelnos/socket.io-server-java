@@ -20,16 +20,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.codeminders.socketio.server.transport;
+package com.codeminders.socketio.server.servlet.transport;
 
-import com.codeminders.socketio.protocol.EngineIOProtocol;
 import com.codeminders.socketio.server.Config;
-import com.codeminders.socketio.server.HttpRequest;
-import com.codeminders.socketio.server.ServletBasedConfig;
-import com.codeminders.socketio.server.Session;
-import com.codeminders.socketio.server.SocketIOManager;
-import com.codeminders.socketio.server.Transport;
-import com.codeminders.socketio.server.TransportConnection;
+import com.codeminders.socketio.server.servlet.ServletBasedConfig;
+import com.codeminders.socketio.server.transport.AbstractTransport;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -38,14 +33,14 @@ import javax.servlet.ServletContext;
  * @author Alexander Sova (bird@codeminders.com)
  * @author Mathieu Carbou
  */
-public abstract class AbstractTransport implements Transport
+public abstract class AbstractServletTransport extends AbstractTransport
 {
     private final ServletConfig servletConfig;
     private final ServletContext servletContext;
 
     private Config config;
 
-    protected AbstractTransport(ServletConfig servletConfig, ServletContext servletContext) {
+    protected AbstractServletTransport(ServletConfig servletConfig, ServletContext servletContext) {
         this.servletConfig = servletConfig;
         this.servletContext = servletContext;
     }
@@ -61,43 +56,9 @@ public abstract class AbstractTransport implements Transport
         this.config = new ServletBasedConfig(this.servletConfig, getType().toString());
     }
 
-    protected final Config getConfig()
-    {
-        return config;
-    }
-
-    protected final TransportConnection createConnection(Session session)
-    {
-        TransportConnection connection = createConnection();
-        connection.setSession(session);
-        connection.init(getConfig());
-        return connection;
-    }
-
-    protected TransportConnection getConnection(HttpRequest request, SocketIOManager sessionManager)
-    {
-        String sessionId = request.getParameter(EngineIOProtocol.SESSION_ID);
-        Session session = null;
-
-        if(sessionId != null && sessionId.length() > 0)
-            session = sessionManager.getSession(sessionId);
-
-        if(session == null)
-            return createConnection(sessionManager.createSession());
-
-        TransportConnection activeConnection = session.getConnection();
-
-        if(activeConnection != null && activeConnection.getTransport() == this)
-            return activeConnection;
-
-        // this is new connection considered for an upgrade
-        return createConnection(session);
-    }
-
     @Override
-    public String toString()
+    protected Config getConfig()
     {
-        return getType().toString();
+        return this.config;
     }
-
 }
