@@ -25,13 +25,16 @@
  */
 package com.codeminders.socketio.server.transport.websocket;
 
+import com.codeminders.socketio.server.HttpRequest;
+import com.codeminders.socketio.server.HttpResponse;
 import com.codeminders.socketio.server.SocketIOManager;
 import com.codeminders.socketio.server.TransportConnection;
 import com.codeminders.socketio.server.TransportType;
 import com.codeminders.socketio.server.transport.AbstractTransport;
 import com.codeminders.socketio.server.transport.AbstractTransportConnection;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -40,6 +43,10 @@ public final class WebsocketTransport extends AbstractTransport
 {
     private static final Logger LOGGER = Logger.getLogger(WebsocketTransport.class.getName());
 
+    public WebsocketTransport(ServletConfig servletConfig, ServletContext servletContext) {
+        super(servletConfig, servletContext);
+    }
+
     @Override
     public TransportType getType()
     {
@@ -47,8 +54,8 @@ public final class WebsocketTransport extends AbstractTransport
     }
 
     @Override
-    public void handle(HttpServletRequest request,
-                       HttpServletResponse response,
+    public void handle(HttpRequest request,
+                       HttpResponse response,
                        SocketIOManager sessionManager) throws IOException
     {
 

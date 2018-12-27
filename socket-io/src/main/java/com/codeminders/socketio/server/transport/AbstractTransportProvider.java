@@ -1,13 +1,19 @@
 package com.codeminders.socketio.server.transport;
 
+import com.codeminders.socketio.common.SocketIOException;
 import com.codeminders.socketio.protocol.EngineIOProtocol;
-import com.codeminders.socketio.server.*;
+import com.codeminders.socketio.server.HttpRequest;
+import com.codeminders.socketio.server.SocketIOProtocolException;
+import com.codeminders.socketio.server.Transport;
+import com.codeminders.socketio.server.TransportProvider;
+import com.codeminders.socketio.server.TransportType;
+import com.codeminders.socketio.server.UnsupportedTransportException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import java.util.*;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -19,19 +25,27 @@ public abstract class AbstractTransportProvider implements TransportProvider {
 
     protected Map<TransportType, Transport> transports = new EnumMap<>(TransportType.class);
 
+    protected final ServletConfig servletConfig;
+    protected final ServletContext servletContext;
+
+    protected AbstractTransportProvider(ServletConfig servletConfig, ServletContext servletContext) {
+        this.servletConfig = servletConfig;
+        this.servletContext = servletContext;
+    }
+
     /**
      *   Creates and initializes all available transports
      */
     @Override
-    public void init(ServletConfig config, ServletContext context)
-            throws ServletException
+    public void init()
+            throws SocketIOException
     {
         addIfNotNull(TransportType.XHR_POLLING,   createXHRPollingTransport());
         addIfNotNull(TransportType.JSONP_POLLING, createJSONPPollingTransport());
         addIfNotNull(TransportType.WEB_SOCKET,    createWebSocketTransport());
 
-        for(Transport t : transports.values())
-            t.init(config, context);
+        for (Transport t : transports.values())
+            t.init();
     }
 
     @Override
@@ -42,7 +56,7 @@ public abstract class AbstractTransportProvider implements TransportProvider {
     }
 
     @Override
-    public Transport getTransport(ServletRequest request)
+    public Transport getTransport(HttpRequest request)
             throws UnsupportedTransportException, SocketIOProtocolException
     {
         String transportName = request.getParameter(EngineIOProtocol.TRANSPORT);
@@ -82,7 +96,7 @@ public abstract class AbstractTransportProvider implements TransportProvider {
 
     protected Transport createXHRPollingTransport()
     {
-        return new XHRPollingTransport();
+        return new XHRPollingTransport(servletConfig, servletContext);
     }
 
     protected Transport createJSONPPollingTransport()

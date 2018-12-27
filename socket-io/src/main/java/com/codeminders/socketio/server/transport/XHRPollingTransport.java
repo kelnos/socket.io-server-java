@@ -27,8 +27,15 @@ package com.codeminders.socketio.server.transport;
 import com.codeminders.socketio.server.TransportConnection;
 import com.codeminders.socketio.server.TransportType;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+
 public class XHRPollingTransport extends AbstractHttpTransport
 {
+    public XHRPollingTransport(ServletConfig servletConfig, ServletContext servletContext) {
+        super(servletConfig, servletContext);
+    }
+
     @Override
     public TransportType getType()
     {

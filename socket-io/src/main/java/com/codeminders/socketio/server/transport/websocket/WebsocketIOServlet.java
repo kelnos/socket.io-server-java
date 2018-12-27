@@ -22,6 +22,7 @@
  */
 package com.codeminders.socketio.server.transport.websocket;
 
+import com.codeminders.socketio.common.SocketIOException;
 import com.codeminders.socketio.server.SocketIOServlet;
 import com.codeminders.socketio.server.TransportProvider;
 
@@ -38,8 +39,12 @@ public abstract class WebsocketIOServlet extends SocketIOServlet
     {
         super.init(config);
         ServletConfigHolder.getInstance().setConfig(config);
-        TransportProvider transportProvider = new WebsocketTransportProvider();
-        transportProvider.init(config, getServletContext());
-        setTransportProvider(transportProvider);
+        try {
+            TransportProvider transportProvider = new WebsocketTransportProvider(config, getServletContext());
+            transportProvider.init();
+            setTransportProvider(transportProvider);
+        } catch (SocketIOException e) {
+            throw new ServletException("Failed to initialize Websocket transport provider: " + e.getMessage(), e);
+        }
     }
 }

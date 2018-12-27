@@ -5,16 +5,17 @@ import com.codeminders.socketio.protocol.BinaryPacket;
 import com.codeminders.socketio.protocol.EngineIOPacket;
 import com.codeminders.socketio.protocol.EngineIOProtocol;
 import com.codeminders.socketio.protocol.SocketIOPacket;
+import com.codeminders.socketio.server.HttpRequest;
+import com.codeminders.socketio.server.HttpResponse;
 import com.codeminders.socketio.server.SocketIOProtocolException;
 import com.codeminders.socketio.server.Transport;
 import com.google.common.io.CharStreams;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +42,7 @@ public class XHRTransportConnection extends AbstractTransportConnection
     }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException
+    public void handle(HttpRequest request, HttpResponse response) throws IOException
     {
         if(done)
             return;
@@ -88,7 +89,7 @@ public class XHRTransportConnection extends AbstractTransportConnection
             {
                 throw new SocketIOProtocolException("Unsupported request content type for incoming polling request: " + contentType);
             }
-            response.getWriter().print("ok");
+            response.getOutputStream().write("ok".getBytes(StandardCharsets.UTF_8));
         }
         else if ("GET".equals(request.getMethod())) //outgoing
         {

@@ -27,6 +27,8 @@ package com.codeminders.socketio.server;
 
 import com.codeminders.socketio.protocol.EngineIOProtocol;
 import com.codeminders.socketio.protocol.SocketIOProtocol;
+import com.codeminders.socketio.server.transport.HttpServletRequestWrapper;
+import com.codeminders.socketio.server.transport.HttpServletResponseWrapper;
 import com.google.common.io.ByteStreams;
 
 import javax.servlet.ServletException;
@@ -132,6 +134,9 @@ public abstract class SocketIOServlet extends HttpServlet
         {
             assert (SocketIOManager.getInstance().getTransportProvider() != null);
 
+            HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(request);
+            HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(response);
+
             try
             {
                 if (LOGGER.isLoggable(Level.FINE))
@@ -142,8 +147,8 @@ public abstract class SocketIOServlet extends HttpServlet
 
                 SocketIOManager.getInstance().
                         getTransportProvider().
-                        getTransport(request).
-                        handle(request, response, SocketIOManager.getInstance());
+                        getTransport(requestWrapper).
+                        handle(requestWrapper, responseWrapper, SocketIOManager.getInstance());
             }
             catch (UnsupportedTransportException | SocketIOProtocolException e)
             {

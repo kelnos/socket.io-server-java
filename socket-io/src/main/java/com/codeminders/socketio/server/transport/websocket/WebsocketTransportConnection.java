@@ -29,14 +29,24 @@ import com.codeminders.socketio.protocol.BinaryPacket;
 import com.codeminders.socketio.protocol.EngineIOPacket;
 import com.codeminders.socketio.protocol.EngineIOProtocol;
 import com.codeminders.socketio.protocol.SocketIOPacket;
-import com.codeminders.socketio.server.*;
+import com.codeminders.socketio.server.Config;
+import com.codeminders.socketio.server.HttpRequest;
+import com.codeminders.socketio.server.HttpResponse;
+import com.codeminders.socketio.server.ServletBasedConfig;
+import com.codeminders.socketio.server.SocketIOManager;
+import com.codeminders.socketio.server.SocketIOProtocolException;
+import com.codeminders.socketio.server.Transport;
 import com.codeminders.socketio.server.transport.AbstractTransportConnection;
 import com.google.common.io.ByteStreams;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.websocket.*;
+import javax.websocket.CloseReason;
+import javax.websocket.EndpointConfig;
+import javax.websocket.OnClose;
+import javax.websocket.OnError;
+import javax.websocket.OnMessage;
+import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpoint;
@@ -60,10 +70,6 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
     private static Class<? extends WebsocketIO> websocketIOClass = WebsocketIO.class;
 
     private WebsocketIO websocketIO;
-
-    public WebsocketTransportConnection() {
-        super(WebsocketTransportProvider.websocket);
-    }
 
     public WebsocketTransportConnection(Transport transport)
     {
@@ -184,7 +190,7 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
     }
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException
+    public void handle(HttpRequest request, HttpResponse response) throws IOException
     {
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unexpected request on upgraded WebSocket connection");
     }
@@ -338,8 +344,7 @@ public final class WebsocketTransportConnection extends AbstractTransportConnect
             sess = SocketIOManager.getInstance().getSession(sessionId);
         }
         if (sess == null) {
-            HttpSession httpSession = getHttpSession(session);
-            sess = SocketIOManager.getInstance().createSession(httpSession);
+            sess = SocketIOManager.getInstance().createSession();
         }
         setSession(sess);
     }

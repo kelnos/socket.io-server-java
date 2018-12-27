@@ -23,13 +23,16 @@
 package com.codeminders.socketio.server.transport;
 
 import com.codeminders.socketio.protocol.EngineIOProtocol;
-import com.codeminders.socketio.server.*;
+import com.codeminders.socketio.server.Config;
+import com.codeminders.socketio.server.HttpRequest;
+import com.codeminders.socketio.server.ServletBasedConfig;
+import com.codeminders.socketio.server.Session;
+import com.codeminders.socketio.server.SocketIOManager;
+import com.codeminders.socketio.server.Transport;
+import com.codeminders.socketio.server.TransportConnection;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 /**
  * @author Alexander Sova (bird@codeminders.com)
@@ -37,7 +40,15 @@ import javax.servlet.http.HttpSession;
  */
 public abstract class AbstractTransport implements Transport
 {
+    private final ServletConfig servletConfig;
+    private final ServletContext servletContext;
+
     private Config config;
+
+    protected AbstractTransport(ServletConfig servletConfig, ServletContext servletContext) {
+        this.servletConfig = servletConfig;
+        this.servletContext = servletContext;
+    }
 
     @Override
     public void destroy()
@@ -45,10 +56,9 @@ public abstract class AbstractTransport implements Transport
     }
 
     @Override
-    public void init(ServletConfig config, ServletContext context)
-            throws ServletException
+    public void init()
     {
-        this.config = new ServletBasedConfig(config, getType().toString());
+        this.config = new ServletBasedConfig(this.servletConfig, getType().toString());
     }
 
     protected final Config getConfig()
@@ -64,7 +74,7 @@ public abstract class AbstractTransport implements Transport
         return connection;
     }
 
-    protected TransportConnection getConnection(HttpServletRequest request, SocketIOManager sessionManager)
+    protected TransportConnection getConnection(HttpRequest request, SocketIOManager sessionManager)
     {
         String sessionId = request.getParameter(EngineIOProtocol.SESSION_ID);
         Session session = null;
@@ -73,7 +83,7 @@ public abstract class AbstractTransport implements Transport
             session = sessionManager.getSession(sessionId);
 
         if(session == null)
-            return createConnection(sessionManager.createSession(request.getSession()));
+            return createConnection(sessionManager.createSession());
 
         TransportConnection activeConnection = session.getConnection();
 

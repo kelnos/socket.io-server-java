@@ -25,12 +25,20 @@ package com.codeminders.socketio.server.transport.websocket;
 import com.codeminders.socketio.server.Transport;
 import com.codeminders.socketio.server.transport.AbstractTransportProvider;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+
 /**
  * @author Alexander Sova (bird@codeminders.com)
  */
 public class WebsocketTransportProvider extends AbstractTransportProvider
 {
-    static final Transport websocket = new WebsocketTransport();
+    private final Transport websocket;
+
+    public WebsocketTransportProvider(ServletConfig servletConfig, ServletContext servletContext) {
+        super(servletConfig, servletContext);
+        this.websocket = new WebsocketTransport(servletConfig, servletContext);
+    }
 
     @Override
     protected Transport createWebSocketTransport()
