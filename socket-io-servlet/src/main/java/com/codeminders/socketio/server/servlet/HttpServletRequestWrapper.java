@@ -1,4 +1,4 @@
-package com.codeminders.socketio.server.servlet.transport;
+package com.codeminders.socketio.server.servlet;
 
 import com.codeminders.socketio.server.HttpRequest;
 

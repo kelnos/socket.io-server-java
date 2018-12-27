@@ -32,8 +32,6 @@ import com.codeminders.socketio.server.SocketIOManager;
 import com.codeminders.socketio.server.SocketIOProtocolException;
 import com.codeminders.socketio.server.TransportProvider;
 import com.codeminders.socketio.server.UnsupportedTransportException;
-import com.codeminders.socketio.server.servlet.transport.HttpServletRequestWrapper;
-import com.codeminders.socketio.server.servlet.transport.HttpServletResponseWrapper;
 import com.google.common.io.ByteStreams;
 
 import javax.servlet.ServletException;
