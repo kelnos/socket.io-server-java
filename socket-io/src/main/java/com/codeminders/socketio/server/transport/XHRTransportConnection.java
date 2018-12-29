@@ -53,7 +53,12 @@ public class XHRTransportConnection extends AbstractTransportConnection
 
         if(getConfig().getBoolean(ALLOW_ALL_ORIGINS, false))
         {
-            response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+            String origin = request.getHeader("Origin");
+            if (origin == null)
+            {
+                origin = "*";
+            }
+            response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Access-Control-Allow-Credentials", "true");
         }
         else
