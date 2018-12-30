@@ -69,6 +69,14 @@
                 <role>contributor</role>
             </roles>
         </contributor>
+        <contributor>
+            <name>Brian Tarricone</name>
+            <email>brian@tarricone.org</email>
+            <timezone>-8</timezone>
+            <roles>
+                <role>contributor</role>
+            </roles>
+        </contributor>
     </contributors>
 
     <licenses>
@@ -94,6 +102,7 @@
         <module>socket-io</module>
         <module>socket-io-servlet</module>
         <module>samples</module>
+        <module>socket-io-akka-http-scala</module>
     </modules>
 
     <distributionManagement>
