@@ -48,7 +48,7 @@ private[akkahttp] class AkkaHttpResponseWrapper extends HttpResponse with AutoCl
     this.contentType.map(s => ContentType.parse(s)).getOrElse(Right(ContentTypes.NoContentType)).map { contentType =>
       model.HttpResponse(
         status = statusCode,
-        headers = headers.asScala.map { case (name, value) => RawHeader(name, value) }.to[scala.collection.immutable.Seq],
+        headers = headers.asScala.map({ case (name, value) => RawHeader(name, value) }).toList,
         entity = HttpEntity(contentType, entitySource)
       )
     }.swap.map { errors => errors.map(_.summary).mkString("; ") }.swap

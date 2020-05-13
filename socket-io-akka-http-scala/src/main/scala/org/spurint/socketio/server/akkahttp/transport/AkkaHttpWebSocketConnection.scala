@@ -53,8 +53,8 @@ private[akkahttp] class AkkaHttpWebSocketConnection(transport: Transport)
           }
         }
 
-        override def onDownstreamFinish(): Unit = {
-          super.onDownstreamFinish()
+        override def onDownstreamFinish(cause: Throwable): Unit = {
+          super.onDownstreamFinish(cause)
           outgoingQueue.close()
         }
       })

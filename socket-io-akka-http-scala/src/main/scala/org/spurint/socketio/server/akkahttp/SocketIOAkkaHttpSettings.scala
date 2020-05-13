@@ -24,7 +24,7 @@ object SocketIOAkkaHttpSettings {
     val configWithFallbacks = config.withFallback(ConfigFactory.defaultReference().getConfig(REFERENCE_CONFIG_PATH))
     SocketIOAkkaHttpSettings(
       allowAllOrigins = configWithFallbacks.getBoolean("allow-all-origins"),
-      allowedOrigins = configWithFallbacks.getStringList("allowed-origins").asScala,
+      allowedOrigins = configWithFallbacks.getStringList("allowed-origins").asScala.toList,
       pingInterval = FiniteDuration(configWithFallbacks.getDuration("ping-interval", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS),
       pingTimeout = FiniteDuration(configWithFallbacks.getDuration("ping-timeout", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS),
     )
