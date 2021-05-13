@@ -15,7 +15,7 @@
     <name>Socket.IO Sample Chat With Embedded Tomcat</name>
 
     <properties>
-        <tomcat.version>8.5.15</tomcat.version>
+        <tomcat.version>8.5.61</tomcat.version>
     </properties>
 
 
